@@ -20,33 +20,13 @@ Every AI coding tool (Claude Code, Cursor, Copilot, Codex) builds its own fragme
 
 ## Quick Start
 
+See the **[Getting Started guide](docs/getting-started.md)** for a full walkthrough
+covering installation, first use, MCP setup, and common workflows.
+
 ```bash
-# Install
 pip install -e ".[dev]"
-
-# Start the server
 engram server start
-
-# Or run directly
-uvicorn engram.api.app:create_app --factory --host 127.0.0.1 --port 8741
-
-# Check health
 curl http://localhost:8741/api/v1/admin/health
-
-# Store a decision
-curl -X POST http://localhost:8741/api/v1/entities -H 'Content-Type: application/json' -d '{
-  "entity_type": "decision",
-  "title": "Use SQLite for storage",
-  "content": "Local-first, zero-dependency storage with sqlite-vec for vector search.",
-  "project": "my-project",
-  "tags": ["architecture", "storage"]
-}'
-
-# Search
-curl -X POST http://localhost:8741/api/v1/search -H 'Content-Type: application/json' -d '{
-  "query": "storage architecture",
-  "limit": 10
-}'
 ```
 
 ## MCP Configuration
