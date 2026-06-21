@@ -184,20 +184,34 @@ differs.
 
 ## Ingest existing knowledge
 
-Pull commit history from a git repository into engram:
+Ingestion uses a plugin system. Specify the plugin name and its parameters:
+
+Pull commit history from a git repository:
 
 ```bash
-curl -X POST http://localhost:8741/api/v1/ingest/git \
+curl -X POST http://localhost:8741/api/v1/ingest \
   -H 'Content-Type: application/json' \
-  -d '{"repo_path": "/path/to/your/repo", "project": "my-project"}'
+  -d '{
+    "plugin": "git",
+    "params": {"repo_path": "/path/to/your/repo", "project": "my-project"}
+  }'
 ```
 
-Ingest markdown documentation:
+Ingest markdown files:
 
 ```bash
-curl -X POST http://localhost:8741/api/v1/ingest/markdown \
+curl -X POST http://localhost:8741/api/v1/ingest \
   -H 'Content-Type: application/json' \
-  -d '{"path": "/path/to/docs", "project": "my-project"}'
+  -d '{
+    "plugin": "manual",
+    "params": {"path": "/path/to/docs", "project": "my-project"}
+  }'
+```
+
+List available plugins:
+
+```bash
+curl http://localhost:8741/api/v1/ingest/plugins
 ```
 
 ## Use the dashboard
@@ -214,6 +228,38 @@ Then open `http://localhost:8741` in your browser. The dashboard provides:
 - **Search** — interactive search with filters and result previews
 - **Graph** — D3-force visualization of the knowledge graph
 - **Entity detail** — full content, provenance history, and relationships
+
+## Rules engine
+
+The rules engine automatically analyzes entities and proposes relationships for the
+knowledge graph. When you ingest a commit, for example, the `GitRule` detects file
+references, issue mentions, ADR references, and reverts — then creates the
+corresponding relationships.
+
+Rules follow an Observation → Finding → Proposal pipeline:
+
+1. **Observe** — each rule declares which entity types it processes
+2. **Extract** — the rule extracts structured findings (file paths, issue refs, etc.)
+3. **Propose** — findings are matched against existing entities to propose relationships
+4. **Accept** — proposals above a confidence threshold are applied automatically
+
+The engine runs during ingestion. You can also trigger it via the `run_quality_check`
+MCP tool or the compaction admin endpoint.
+
+## Time-travel queries
+
+Every entity change is recorded as a provenance event with a point-in-time snapshot.
+You can retrieve the state of any entity at any historical timestamp:
+
+```bash
+curl "http://localhost:8741/api/v1/entities/<entity-id>/snapshot-at?timestamp=2025-01-15T10:30:00Z"
+```
+
+Or list all snapshots:
+
+```bash
+curl http://localhost:8741/api/v1/entities/<entity-id>/snapshots
+```
 
 ## View entity details
 
@@ -249,7 +295,10 @@ of the box for local development.
 | `ENGRAM_HOST` | `127.0.0.1` | Bind address |
 | `ENGRAM_PORT` | `8741` | Listen port |
 | `ENGRAM_EMBEDDING_PROVIDER` | `local` | `local` or `openai` |
+| `ENGRAM_EMBEDDING_MODEL` | `all-MiniLM-L6-v2` | Embedding model name |
+| `ENGRAM_EMBEDDING_DIMENSIONS` | `384` | Embedding vector dimensions |
 | `ENGRAM_OPENAI_API_KEY` | — | Required for OpenAI embeddings |
+| `ENGRAM_DEDUP_THRESHOLD` | `0.92` | Cosine similarity for near-duplicate detection |
 | `ENGRAM_ENCRYPTION_ENABLED` | `false` | AES-256 field encryption |
 | `ENGRAM_LOG_LEVEL` | `INFO` | Logging verbosity |
 
@@ -279,5 +328,5 @@ Store the *why* and the *context* that surrounds them.
 - Browse the [REST API docs](http://localhost:8741/docs) (Swagger UI, available when
   the server is running)
 - Read the [README](../README.md) for the full feature list and architecture diagram
-- Look at `src/engram/models/base.py` for the complete list of entity types and
-  relationship types
+- See `src/engram/models/base.py` for all 31 entity types and 21 relationship types
+- See `src/engram/rules/` for the inference engine and writing custom rules

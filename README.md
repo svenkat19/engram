@@ -6,10 +6,11 @@ Every AI coding tool (Claude Code, Cursor, Copilot, Codex) builds its own fragme
 
 ## Features
 
-- **Knowledge Graph** — entities (decisions, bugs, commits, failed attempts, etc.) connected by typed relationships
+- **Knowledge Graph** — 31 entity types (decisions, bugs, commits, failed attempts, design rationale, etc.) connected by 21 typed relationships
+- **Rules Engine** — automated inference that analyzes entities and proposes relationships (e.g. linking commits to issues, detecting reverts, connecting decisions to components)
 - **Hybrid Search** — FTS5 full-text + sqlite-vec semantic search combined via Reciprocal Rank Fusion
 - **Memory Quality Engine** — importance scoring, near-duplicate detection, conflict detection, temporal decay, background compaction
-- **AI Provenance** — full audit trail with point-in-time snapshots for time-travel queries
+- **AI Provenance** — full audit trail with point-in-time snapshots and time-travel queries (`/entities/{id}/snapshot-at`)
 - **MCP Server** — 10 tools for AI coding assistants (`remember`, `recall`, `record_decision`, `find_contradictions`, etc.)
 - **REST API** — FastAPI with OpenAPI docs at `/docs`
 - **CLI** — `engram add decision`, `engram search`, `engram admin stats`
@@ -93,7 +94,10 @@ Environment variables (prefix `ENGRAM_`):
 | `ENGRAM_HOST` | `127.0.0.1` | Server bind address |
 | `ENGRAM_PORT` | `8741` | Server port |
 | `ENGRAM_EMBEDDING_PROVIDER` | `local` | `local` (sentence-transformers) or `openai` |
+| `ENGRAM_EMBEDDING_MODEL` | `all-MiniLM-L6-v2` | Embedding model name |
+| `ENGRAM_EMBEDDING_DIMENSIONS` | `384` | Embedding vector dimensions |
 | `ENGRAM_OPENAI_API_KEY` | — | Required when using OpenAI embeddings |
+| `ENGRAM_DEDUP_THRESHOLD` | `0.92` | Cosine similarity threshold for near-duplicate detection |
 | `ENGRAM_ENCRYPTION_ENABLED` | `false` | Enable AES-256 field encryption |
 | `ENGRAM_ENCRYPTION_KEY` | — | Fernet key for encryption |
 | `ENGRAM_LOG_LEVEL` | `INFO` | Logging level |
@@ -101,38 +105,44 @@ Environment variables (prefix `ENGRAM_`):
 ## Architecture
 
 ```
-┌─────────────────────────────────────────────┐
-│  AI Tools (Claude Code, Cursor, Copilot)    │
-│         ┌──────────┐  ┌──────────┐          │
-│         │   MCP    │  │  REST    │          │
-│         │  Client  │  │  Client  │          │
-│         └────┬─────┘  └────┬─────┘          │
-└──────────────┼──────────────┼───────────────┘
+┌─────────────────────────────────────────────────┐
+│  AI Tools (Claude Code, Cursor, Copilot)        │
+│         ┌──────────┐  ┌──────────┐              │
+│         │   MCP    │  │  REST    │              │
+│         │  Client  │  │  Client  │              │
+│         └────┬─────┘  └────┬─────┘              │
+└──────────────┼──────────────┼───────────────────┘
                │              │
-┌──────────────┼──────────────┼───────────────┐
-│  Engram      │              │               │
-│         ┌────▼─────┐  ┌────▼─────┐          │
-│         │   MCP    │  │  FastAPI │          │
-│         │  Server  │  │  Routes  │          │
-│         └────┬─────┘  └────┬─────┘          │
-│              └──────┬───────┘               │
-│                     │                       │
-│         ┌───────────▼──────────┐            │
-│         │   Hybrid Search      │            │
-│         │  (FTS5 + Vec + RRF)  │            │
-│         └───────────┬──────────┘            │
-│                     │                       │
-│    ┌────────┬───────┼───────┬────────┐      │
-│    │Entity  │Event  │Vector │FTS     │      │
-│    │Store   │Store  │Store  │Store   │      │
-│    └────┬───┘───┬───┘───┬───┘───┬────┘      │
-│         └───────┴───────┴───────┘           │
-│                     │                       │
-│            ┌────────▼────────┐              │
-│            │     SQLite      │              │
-│            │  (WAL + vec)    │              │
-│            └─────────────────┘              │
-└─────────────────────────────────────────────┘
+┌──────────────┼──────────────┼───────────────────┐
+│  Engram      │              │                   │
+│         ┌────▼─────┐  ┌────▼─────┐              │
+│         │   MCP    │  │  FastAPI │              │
+│         │  Server  │  │  Routes  │              │
+│         └────┬─────┘  └────┬─────┘              │
+│              └──────┬───────┘                   │
+│                     │                           │
+│    ┌────────────────┼────────────────┐          │
+│    │                │                │          │
+│    ▼                ▼                ▼          │
+│  ┌──────────┐  ┌──────────┐  ┌───────────┐     │
+│  │ Hybrid   │  │  Rules   │  │  Quality  │     │
+│  │ Search   │  │  Engine  │  │  Engine   │     │
+│  │(FTS+Vec) │  │(infer &  │  │(decay,    │     │
+│  │          │  │ propose) │  │ compact)  │     │
+│  └────┬─────┘  └────┬─────┘  └─────┬─────┘     │
+│       └──────────────┼──────────────┘           │
+│                      │                          │
+│    ┌────────┬────────┼────────┬────────┐        │
+│    │Entity  │Event   │Vector  │FTS     │        │
+│    │Store   │Store   │Store   │Store   │        │
+│    └────┬───┘────┬───┘────┬───┘────┬───┘        │
+│         └────────┴────────┴────────┘            │
+│                      │                          │
+│             ┌────────▼────────┐                 │
+│             │     SQLite      │                 │
+│             │  (WAL + vec)    │                 │
+│             └─────────────────┘                 │
+└─────────────────────────────────────────────────┘
 ```
 
 ## Development
