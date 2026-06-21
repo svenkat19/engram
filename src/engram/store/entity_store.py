@@ -7,7 +7,7 @@ from datetime import datetime, timezone
 from ulid import ULID
 
 from engram.db import crypto_service
-from engram.models.base import EntityStatus
+from engram.models.base import EntityStatus, EntityType
 from engram.models.entities import Entity, EntityCreate, EntityFilter, EntityUpdate
 
 
@@ -215,6 +215,37 @@ class EntityStore:
             (now, entity_id),
         )
         self.conn.commit()
+
+    def find_by_file_paths(
+        self,
+        paths: list[str],
+        exclude_id: str | None = None,
+        exclude_types: list[EntityType] | None = None,
+    ) -> list[Entity]:
+        if not paths:
+            return []
+        placeholders = ", ".join("?" for _ in paths)
+        query = (
+            f"SELECT DISTINCT ef.entity_id FROM entity_files ef "
+            f"JOIN entities e ON e.id = ef.entity_id "
+            f"WHERE ef.file_path IN ({placeholders}) "
+            f"AND e.status != ?"
+        )
+        params: list[object] = [*paths, EntityStatus.DELETED.value]
+        if exclude_id is not None:
+            query += " AND ef.entity_id != ?"
+            params.append(exclude_id)
+        if exclude_types:
+            type_placeholders = ", ".join("?" for _ in exclude_types)
+            query += f" AND e.entity_type NOT IN ({type_placeholders})"
+            params.extend(t.value for t in exclude_types)
+        rows = self.conn.execute(query, params).fetchall()
+        results: list[Entity] = []
+        for row in rows:
+            entity = self.get(row["entity_id"])
+            if entity is not None:
+                results.append(entity)
+        return results
 
     def _build_filter(
         self, filter: EntityFilter

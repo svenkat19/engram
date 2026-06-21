@@ -9,6 +9,7 @@ class IngestResult:
     events_created: int = 0
     entities_created: int = 0
     errors: list[str] = field(default_factory=list)
+    entity_ids: list[str] = field(default_factory=list)
 
 
 class IngestPlugin(ABC):

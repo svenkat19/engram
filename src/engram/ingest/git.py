@@ -104,8 +104,9 @@ class GitIngestPlugin(IngestPlugin):
                     files=changed_files,
                     created_by=author_name,
                 )
-                entity_store.create(entity)
+                created = entity_store.create(entity)
                 result.entities_created += 1
+                result.entity_ids.append(created.id)
 
         return result
 
