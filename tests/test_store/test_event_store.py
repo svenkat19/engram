@@ -1,7 +1,7 @@
 from datetime import datetime, timezone
 
-from engram.models.events import EventCreate, EventFilter
-from engram.store.event_store import EventStore
+from yonakh.models.events import EventCreate, EventFilter
+from yonakh.store.event_store import EventStore
 
 
 def test_create_and_get(db_conn):

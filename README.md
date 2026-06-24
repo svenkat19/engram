@@ -1,19 +1,19 @@
-# engram
+# Yonakh
 
 Local-first, vendor-neutral AI memory server for software engineering workflows.
 
-Every AI coding tool (Claude Code, Cursor, Copilot, Codex) builds its own fragmented memory. Engram provides a shared knowledge layer that any tool connects to via REST API or MCP protocol — architecture decisions, bug history, failed attempts, design rationale, and project context all persisted locally in SQLite.
+Every AI coding tool (Claude Code, Cursor, Copilot, Codex) builds its own fragmented memory. Yonakh provides a shared knowledge layer that any tool connects to via REST API or MCP protocol — architecture decisions, bug history, failed attempts, design rationale, and project context all persisted locally in SQLite.
 
 ## Features
 
-- **Knowledge Graph** — 31 entity types (decisions, bugs, commits, failed attempts, design rationale, etc.) connected by 21 typed relationships
+- **Knowledge Graph** — 21 entity types (decisions, bugs, commits, failed attempts, design rationale, etc.) connected by 21 typed relationships
 - **Rules Engine** — automated inference that analyzes entities and proposes relationships (e.g. linking commits to issues, detecting reverts, connecting decisions to components)
 - **Hybrid Search** — FTS5 full-text + sqlite-vec semantic search combined via Reciprocal Rank Fusion
 - **Memory Quality Engine** — importance scoring, near-duplicate detection, conflict detection, temporal decay, background compaction
 - **AI Provenance** — full audit trail with point-in-time snapshots and time-travel queries (`/entities/{id}/snapshot-at`)
 - **MCP Server** — 10 tools for AI coding assistants (`remember`, `recall`, `record_decision`, `find_contradictions`, etc.)
 - **REST API** — FastAPI with OpenAPI docs at `/docs`
-- **CLI** — `engram add decision`, `engram search`, `engram admin stats`
+- **CLI** — `yonakh add decision`, `yonakh search`, `yonakh admin stats`
 - **Web Dashboard** — React SPA with graph explorer, search, and entity detail views
 - **Encryption** — optional AES-256 field encryption for sensitive content
 - **Ingest Plugins** — git history, markdown files, extensible plugin system
@@ -26,7 +26,7 @@ covering installation, first use, MCP setup, and common workflows.
 
 ```bash
 pip install -e ".[dev]"
-engram server start
+yonakh server start
 curl http://localhost:8741/api/v1/admin/health
 ```
 
@@ -37,9 +37,9 @@ Add to your AI tool's MCP settings (e.g., Claude Code `~/.claude.json`):
 ```json
 {
   "mcpServers": {
-    "engram": {
+    "yonakh": {
       "command": "python",
-      "args": ["-m", "engram.mcp_server.server"],
+      "args": ["-m", "yonakh.mcp_server.server"],
       "env": {}
     }
   }
@@ -65,42 +65,42 @@ Add to your AI tool's MCP settings (e.g., Claude Code `~/.claude.json`):
 
 ```bash
 # Add knowledge
-engram add decision "Use SQLite" --project my-project
-engram add note "Auth uses JWT tokens" --tags auth,security
-engram add failed-attempt "Tried Redis for caching" --why "Too much operational overhead"
+yonakh add decision "Use SQLite" --project my-project
+yonakh add note "Auth uses JWT tokens" --tags auth,security
+yonakh add failed-attempt "Tried Redis for caching" --why "Too much operational overhead"
 
 # Search
-engram search "database architecture"
+yonakh search "database architecture"
 
 # Show entity details
-engram show <entity-id> --provenance
+yonakh show <entity-id> --provenance
 
 # Server management
-engram server start
-engram server status
+yonakh server start
+yonakh server status
 
 # Admin
-engram admin stats
-engram admin reindex
+yonakh admin stats
+yonakh admin reindex
 ```
 
 ## Configuration
 
-Environment variables (prefix `ENGRAM_`):
+Environment variables (prefix `YONAKH_`):
 
 | Variable | Default | Description |
 |----------|---------|-------------|
-| `ENGRAM_DB_PATH` | `~/.engram/engram.db` | SQLite database path |
-| `ENGRAM_HOST` | `127.0.0.1` | Server bind address |
-| `ENGRAM_PORT` | `8741` | Server port |
-| `ENGRAM_EMBEDDING_PROVIDER` | `local` | `local` (sentence-transformers) or `openai` |
-| `ENGRAM_EMBEDDING_MODEL` | `all-MiniLM-L6-v2` | Embedding model name |
-| `ENGRAM_EMBEDDING_DIMENSIONS` | `384` | Embedding vector dimensions |
-| `ENGRAM_OPENAI_API_KEY` | — | Required when using OpenAI embeddings |
-| `ENGRAM_DEDUP_THRESHOLD` | `0.92` | Cosine similarity threshold for near-duplicate detection |
-| `ENGRAM_ENCRYPTION_ENABLED` | `false` | Enable AES-256 field encryption |
-| `ENGRAM_ENCRYPTION_KEY` | — | Fernet key for encryption |
-| `ENGRAM_LOG_LEVEL` | `INFO` | Logging level |
+| `YONAKH_DB_PATH` | `~/.yonakh/yonakh.db` | SQLite database path |
+| `YONAKH_HOST` | `127.0.0.1` | Server bind address |
+| `YONAKH_PORT` | `8741` | Server port |
+| `YONAKH_EMBEDDING_PROVIDER` | `local` | `local` (sentence-transformers) or `openai` |
+| `YONAKH_EMBEDDING_MODEL` | `all-MiniLM-L6-v2` | Embedding model name |
+| `YONAKH_EMBEDDING_DIMENSIONS` | `384` | Embedding vector dimensions |
+| `YONAKH_OPENAI_API_KEY` | — | Required when using OpenAI embeddings |
+| `YONAKH_DEDUP_THRESHOLD` | `0.92` | Cosine similarity threshold for near-duplicate detection |
+| `YONAKH_ENCRYPTION_ENABLED` | `false` | Enable AES-256 field encryption |
+| `YONAKH_ENCRYPTION_KEY` | — | Fernet key for encryption |
+| `YONAKH_LOG_LEVEL` | `INFO` | Logging level |
 
 ## Architecture
 
@@ -114,7 +114,7 @@ Environment variables (prefix `ENGRAM_`):
 └──────────────┼──────────────┼───────────────────┘
                │              │
 ┌──────────────┼──────────────┼───────────────────┐
-│  Engram      │              │                   │
+│  Yonakh      │              │                   │
 │         ┌────▼─────┐  ┌────▼─────┐              │
 │         │   MCP    │  │  FastAPI │              │
 │         │  Server  │  │  Routes  │              │
@@ -158,7 +158,7 @@ pytest
 ruff check src/ tests/
 
 # Type check
-mypy src/engram/
+mypy src/yonakh/
 ```
 
 ## License

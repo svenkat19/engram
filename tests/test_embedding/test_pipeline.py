@@ -6,11 +6,11 @@ import sqlite3
 
 import pytest
 
-from engram.embedding.pipeline import EmbeddingPipeline, build_embed_text
-from engram.models.base import EntityType
-from engram.models.entities import EntityCreate
-from engram.store.entity_store import EntityStore
-from engram.store.vector_store import VectorStore
+from yonakh.embedding.pipeline import EmbeddingPipeline, build_embed_text
+from yonakh.models.base import EntityType
+from yonakh.models.entities import EntityCreate
+from yonakh.store.entity_store import EntityStore
+from yonakh.store.vector_store import VectorStore
 from tests.fake_embedding import FakeEmbeddingProvider
 
 
@@ -27,7 +27,7 @@ def _vec_available() -> bool:
 
 
 def test_build_embed_text():
-    from engram.models.entities import Entity
+    from yonakh.models.entities import Entity
     from datetime import datetime, timezone
 
     entity = Entity(

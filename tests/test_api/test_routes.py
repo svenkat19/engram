@@ -8,9 +8,9 @@ import pytest
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
 
-from engram.api.deps import init_app_state
-from engram.api.routes import admin, entities, events, ingest, relationships, search
-from engram.db.engine import _set_pragmas, _load_vec_extension, _read_schema_sql
+from yonakh.api.deps import init_app_state
+from yonakh.api.routes import admin, entities, events, ingest, relationships, search
+from yonakh.db.engine import _set_pragmas, _load_vec_extension, _read_schema_sql
 from tests.fake_embedding import FakeEmbeddingProvider
 
 
@@ -96,7 +96,7 @@ class TestEntities:
             "entity_type": "decision",
             "title": "Use SQLite",
             "content": "Local-first storage solution.",
-            "project": "engram",
+            "project": "yonakh",
             "tags": ["architecture"],
             "files": ["db/engine.py"],
         })
@@ -193,13 +193,13 @@ class TestSearch:
             "entity_type": "decision",
             "title": "Use SQLite for storage",
             "content": "SQLite is local-first.",
-            "project": "engram",
+            "project": "yonakh",
         })
         client.post("/api/v1/entities", json={
             "entity_type": "bug_report",
             "title": "WAL mode not enabled",
             "content": "SQLite WAL mode was missing.",
-            "project": "engram",
+            "project": "yonakh",
         })
 
     def test_hybrid_search(self, client):

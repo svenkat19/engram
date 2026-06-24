@@ -1,11 +1,11 @@
-from engram.models.base import EntityType, RelationType
-from engram.models.entities import EntityCreate
-from engram.rules.engine import RulesEngine
-from engram.rules.git_rule import GitRule
-from engram.rules.validator import ThresholdValidator
-from engram.store.entity_store import EntityStore
-from engram.store.provenance_store import ProvenanceStore
-from engram.store.relationship_store import RelationshipStore
+from yonakh.models.base import EntityType, RelationType
+from yonakh.models.entities import EntityCreate
+from yonakh.rules.engine import RulesEngine
+from yonakh.rules.git_rule import GitRule
+from yonakh.rules.validator import ThresholdValidator
+from yonakh.store.entity_store import EntityStore
+from yonakh.store.provenance_store import ProvenanceStore
+from yonakh.store.relationship_store import RelationshipStore
 
 
 def _make_engine(db_conn, threshold=0.85):
@@ -143,8 +143,8 @@ class TestEngine:
 
 class TestValidator:
     def test_threshold_filtering(self):
-        from engram.models.base import RelationType
-        from engram.rules.proposals import Proposal
+        from yonakh.models.base import RelationType
+        from yonakh.rules.proposals import Proposal
 
         validator = ThresholdValidator(threshold=0.8)
         proposals = [

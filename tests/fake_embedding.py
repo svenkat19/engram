@@ -5,7 +5,7 @@ from __future__ import annotations
 import hashlib
 import math
 
-from engram.embedding.base import EmbeddingProvider
+from yonakh.embedding.base import EmbeddingProvider
 
 FAKE_DIM = 384
 

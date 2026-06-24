@@ -1,11 +1,11 @@
 from datetime import UTC, datetime
 
-from engram.models.base import EntityType, RelationType
-from engram.models.entities import Entity, EntityCreate
-from engram.rules.findings import FindingType
-from engram.rules.git_rule import GitRule
-from engram.store.entity_store import EntityStore
-from engram.store.relationship_store import RelationshipStore
+from yonakh.models.base import EntityType, RelationType
+from yonakh.models.entities import Entity, EntityCreate
+from yonakh.rules.findings import FindingType
+from yonakh.rules.git_rule import GitRule
+from yonakh.store.entity_store import EntityStore
+from yonakh.store.relationship_store import RelationshipStore
 
 
 def _make_entity(

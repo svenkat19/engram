@@ -1,6 +1,6 @@
-from engram.models.base import EntityStatus, EntityType
-from engram.models.entities import EntityCreate, EntityFilter, EntityUpdate
-from engram.store.entity_store import EntityStore
+from yonakh.models.base import EntityStatus, EntityType
+from yonakh.models.entities import EntityCreate, EntityFilter, EntityUpdate
+from yonakh.store.entity_store import EntityStore
 
 
 def test_create_and_get(db_conn):
@@ -10,9 +10,9 @@ def test_create_and_get(db_conn):
         title="Use SQLite for storage",
         content="We chose SQLite because it's local-first and zero-dependency.",
         properties={"status": "accepted"},
-        project="engram",
+        project="yonakh",
         tags=["architecture", "storage"],
-        files=["src/engram/db/engine.py"],
+        files=["src/yonakh/db/engine.py"],
         created_by="test-user",
         confidence=0.9,
     ))
@@ -21,7 +21,7 @@ def test_create_and_get(db_conn):
     assert entity.entity_type == EntityType.DECISION
     assert entity.title == "Use SQLite for storage"
     assert entity.tags == ["architecture", "storage"]
-    assert entity.files == ["src/engram/db/engine.py"]
+    assert entity.files == ["src/yonakh/db/engine.py"]
     assert entity.confidence == 0.9
     assert entity.status == EntityStatus.ACTIVE
 

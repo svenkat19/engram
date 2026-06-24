@@ -1,8 +1,8 @@
-from engram.models.base import EntityType, RelationType
-from engram.models.entities import EntityCreate
-from engram.models.relationships import RelationshipCreate, RelationshipFilter
-from engram.store.entity_store import EntityStore
-from engram.store.relationship_store import RelationshipStore
+from yonakh.models.base import EntityType, RelationType
+from yonakh.models.entities import EntityCreate
+from yonakh.models.relationships import RelationshipCreate, RelationshipFilter
+from yonakh.store.entity_store import EntityStore
+from yonakh.store.relationship_store import RelationshipStore
 
 
 def _make_entities(db_conn, count=3):

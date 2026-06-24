@@ -1,22 +1,22 @@
-# Getting Started with Engram
+# Getting Started with Yonakh
 
-Engram is a local memory server for AI-assisted software engineering. It gives your
+Yonakh is a local memory server for AI-assisted software engineering. It gives your
 AI coding tools — Claude Code, Cursor, Copilot, or anything that speaks REST or
 MCP — a shared, persistent knowledge layer backed by SQLite.
 
-Instead of each tool building its own fragmented context, engram stores architecture
+Instead of each tool building its own fragmented context, Yonakh stores architecture
 decisions, bug history, failed attempts, and design rationale in one place. It
 indexes everything with hybrid search (full-text + semantic vectors) so your tools
 can recall relevant context automatically.
 
-This guide walks you through installation, first use, and connecting engram to your
+This guide walks you through installation, first use, and connecting Yonakh to your
 AI tools.
 
 ## Prerequisites
 
 - Python 3.11 or later
 - pip (or uv)
-- Git (for `engram ingest git`)
+- Git (for `yonakh ingest git`)
 
 No external databases, Docker, or cloud services required — everything runs locally
 in SQLite.
@@ -26,28 +26,28 @@ in SQLite.
 Clone the repository and install in development mode:
 
 ```bash
-git clone https://github.com/shvenkat/engram.git
-cd engram
+git clone https://github.com/shvenkat/yonakh.git
+cd yonakh
 pip install -e ".[dev]"
 ```
 
-This installs the `engram` CLI and all dependencies, including a local embedding
+This installs the `yonakh` CLI and all dependencies, including a local embedding
 model (~80 MB download on first run).
 
 Verify the install:
 
 ```bash
-engram --help
+yonakh --help
 ```
 
 ## Start the server
 
 ```bash
-engram server start
+yonakh server start
 ```
 
 This starts the REST API on `http://127.0.0.1:8741`. The database is created
-automatically at `~/.engram/engram.db`.
+automatically at `~/.yonakh/yonakh.db`.
 
 Check that it's running:
 
@@ -64,7 +64,7 @@ You should see `{"status": "ok"}`.
 Record an architecture decision:
 
 ```bash
-engram add decision "Use SQLite for storage" \
+yonakh add decision "Use SQLite for storage" \
   --project my-project \
   --tags architecture,storage
 ```
@@ -72,7 +72,7 @@ engram add decision "Use SQLite for storage" \
 Add a quick note:
 
 ```bash
-engram add note "Auth service uses JWT with 15-minute expiry" \
+yonakh add note "Auth service uses JWT with 15-minute expiry" \
   --project my-project \
   --tags auth,security
 ```
@@ -80,7 +80,7 @@ engram add note "Auth service uses JWT with 15-minute expiry" \
 Record something that didn't work (so nobody tries it again):
 
 ```bash
-engram add failed-attempt "Tried Redis for session storage" \
+yonakh add failed-attempt "Tried Redis for session storage" \
   --why "Added operational complexity without meaningful latency improvement" \
   --lessons "SQLite WAL mode handles our concurrency needs"
 ```
@@ -101,17 +101,17 @@ curl -X POST http://localhost:8741/api/v1/entities \
 
 ## Search your memories
 
-Engram combines full-text search (SQLite FTS5) with semantic vector search
+Yonakh combines full-text search (SQLite FTS5) with semantic vector search
 (sqlite-vec) using Reciprocal Rank Fusion, so you can search by keyword or meaning.
 
 ```bash
-engram search "database architecture"
+yonakh search "database architecture"
 ```
 
 Filter by type and project:
 
 ```bash
-engram search "authentication" --type decision --project my-project --limit 5
+yonakh search "authentication" --type decision --project my-project --limit 5
 ```
 
 Or via the API:
@@ -124,7 +124,7 @@ curl -X POST http://localhost:8741/api/v1/search \
 
 ## Connect to Claude Code
 
-Add engram to your MCP configuration so Claude Code can remember and recall
+Add Yonakh to your MCP configuration so Claude Code can remember and recall
 context automatically.
 
 Add to `~/.claude.json` (or your project's `.claude/settings.json`):
@@ -132,9 +132,9 @@ Add to `~/.claude.json` (or your project's `.claude/settings.json`):
 ```json
 {
   "mcpServers": {
-    "engram": {
+    "yonakh": {
       "command": "python",
-      "args": ["-m", "engram.mcp_server.server"]
+      "args": ["-m", "yonakh.mcp_server.server"]
     }
   }
 }
@@ -171,9 +171,9 @@ Add to your project's `.cursor/mcp.json`:
 ```json
 {
   "mcpServers": {
-    "engram": {
+    "yonakh": {
       "command": "python",
-      "args": ["-m", "engram.mcp_server.server"]
+      "args": ["-m", "yonakh.mcp_server.server"]
     }
   }
 }
@@ -220,7 +220,7 @@ Build and open the web dashboard:
 
 ```bash
 make dashboard
-engram server start
+yonakh server start
 ```
 
 Then open `http://localhost:8741` in your browser. The dashboard provides:
@@ -266,8 +266,8 @@ curl http://localhost:8741/api/v1/entities/<entity-id>/snapshots
 Inspect a specific entity and its audit trail:
 
 ```bash
-engram show <entity-id>
-engram show <entity-id> --provenance
+yonakh show <entity-id>
+yonakh show <entity-id> --provenance
 ```
 
 ## Admin commands
@@ -275,43 +275,43 @@ engram show <entity-id> --provenance
 Check storage stats:
 
 ```bash
-engram admin stats
+yonakh admin stats
 ```
 
 Rebuild search indexes (after a schema migration or if search seems off):
 
 ```bash
-engram admin reindex
+yonakh admin reindex
 ```
 
 ## Configuration
 
-All settings use environment variables with the `ENGRAM_` prefix. Defaults work out
+All settings use environment variables with the `YONAKH_` prefix. Defaults work out
 of the box for local development.
 
 | Variable | Default | Purpose |
 |----------|---------|---------|
-| `ENGRAM_DB_PATH` | `~/.engram/engram.db` | Database location |
-| `ENGRAM_HOST` | `127.0.0.1` | Bind address |
-| `ENGRAM_PORT` | `8741` | Listen port |
-| `ENGRAM_EMBEDDING_PROVIDER` | `local` | `local` or `openai` |
-| `ENGRAM_EMBEDDING_MODEL` | `all-MiniLM-L6-v2` | Embedding model name |
-| `ENGRAM_EMBEDDING_DIMENSIONS` | `384` | Embedding vector dimensions |
-| `ENGRAM_OPENAI_API_KEY` | — | Required for OpenAI embeddings |
-| `ENGRAM_DEDUP_THRESHOLD` | `0.92` | Cosine similarity for near-duplicate detection |
-| `ENGRAM_ENCRYPTION_ENABLED` | `false` | AES-256 field encryption |
-| `ENGRAM_LOG_LEVEL` | `INFO` | Logging verbosity |
+| `YONAKH_DB_PATH` | `~/.yonakh/yonakh.db` | Database location |
+| `YONAKH_HOST` | `127.0.0.1` | Bind address |
+| `YONAKH_PORT` | `8741` | Listen port |
+| `YONAKH_EMBEDDING_PROVIDER` | `local` | `local` or `openai` |
+| `YONAKH_EMBEDDING_MODEL` | `all-MiniLM-L6-v2` | Embedding model name |
+| `YONAKH_EMBEDDING_DIMENSIONS` | `384` | Embedding vector dimensions |
+| `YONAKH_OPENAI_API_KEY` | — | Required for OpenAI embeddings |
+| `YONAKH_DEDUP_THRESHOLD` | `0.92` | Cosine similarity for near-duplicate detection |
+| `YONAKH_ENCRYPTION_ENABLED` | `false` | AES-256 field encryption |
+| `YONAKH_LOG_LEVEL` | `INFO` | Logging verbosity |
 
 To use OpenAI embeddings instead of the local model:
 
 ```bash
-export ENGRAM_EMBEDDING_PROVIDER=openai
-export ENGRAM_OPENAI_API_KEY=sk-...
+export YONAKH_EMBEDDING_PROVIDER=openai
+export YONAKH_OPENAI_API_KEY=sk-...
 ```
 
 ## What to store
 
-Engram is most valuable when you store knowledge that would otherwise be lost
+Yonakh is most valuable when you store knowledge that would otherwise be lost
 between sessions:
 
 - **Architecture decisions** — why you chose X over Y, what tradeoffs you accepted
@@ -328,5 +328,5 @@ Store the *why* and the *context* that surrounds them.
 - Browse the [REST API docs](http://localhost:8741/docs) (Swagger UI, available when
   the server is running)
 - Read the [README](../README.md) for the full feature list and architecture diagram
-- See `src/engram/models/base.py` for all 31 entity types and 21 relationship types
-- See `src/engram/rules/` for the inference engine and writing custom rules
+- See `src/yonakh/models/base.py` for all 21 entity types and 21 relationship types
+- See `src/yonakh/rules/` for the inference engine and writing custom rules

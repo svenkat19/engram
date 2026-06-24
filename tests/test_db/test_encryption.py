@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from engram.db.encryption import FieldEncryptor
+from yonakh.db.encryption import FieldEncryptor
 
 
 def test_encrypt_decrypt():
@@ -20,7 +20,7 @@ def test_from_passphrase_deterministic_with_salt():
 
 
 def test_crypto_service_disabled_by_default():
-    from engram.db import crypto_service
+    from yonakh.db import crypto_service
     assert crypto_service.encrypt("hello") == "hello"
     assert crypto_service.decrypt("hello") == "hello"
     assert crypto_service.encrypt(None) is None

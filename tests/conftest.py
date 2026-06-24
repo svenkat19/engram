@@ -2,8 +2,8 @@ import sqlite3
 
 import pytest
 
-from engram.db.engine import _set_pragmas, _load_vec_extension, _read_schema_sql
-from engram.config import get_settings
+from yonakh.db.engine import _set_pragmas, _load_vec_extension, _read_schema_sql
+from yonakh.config import get_settings
 
 
 @pytest.fixture

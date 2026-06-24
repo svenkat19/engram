@@ -1,6 +1,6 @@
 import pytest
 
-from engram.rules.findings import Finding, FindingType
+from yonakh.rules.findings import Finding, FindingType
 
 
 def test_finding_is_frozen():

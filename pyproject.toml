@@ -3,13 +3,13 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [project]
-name = "engram"
+name = "yonakh"
 version = "0.1.0"
 description = "Local-first AI memory server for software engineering workflows"
 readme = "README.md"
 license = "MIT"
 requires-python = ">=3.11"
-authors = [{ name = "shvenkat" }]
+authors = [{ name = "Shashank Venkat", email = "shashyv@gmail.com" }]
 keywords = ["ai", "memory", "knowledge-graph", "mcp", "developer-tools"]
 classifiers = [
     "Development Status :: 3 - Alpha",
@@ -46,10 +46,10 @@ dev = [
 ]
 
 [project.scripts]
-engram = "engram.cli.main:cli"
+yonakh = "yonakh.cli.main:cli"
 
 [tool.hatch.build.targets.wheel]
-packages = ["src/engram"]
+packages = ["src/yonakh"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

@@ -1,7 +1,7 @@
-from engram.models.base import EntityType
-from engram.models.entities import EntityCreate
-from engram.store.entity_store import EntityStore
-from engram.store.fts_store import FTSStore
+from yonakh.models.base import EntityType
+from yonakh.models.entities import EntityCreate
+from yonakh.store.entity_store import EntityStore
+from yonakh.store.fts_store import FTSStore
 
 
 def _seed(db_conn):
@@ -10,19 +10,19 @@ def _seed(db_conn):
         entity_type=EntityType.DECISION,
         title="Use SQLite for storage",
         content="SQLite is local-first and has great performance for single-user workloads.",
-        project="engram",
+        project="yonakh",
     ))
     store.create(EntityCreate(
         entity_type=EntityType.DECISION,
         title="Use React for dashboard",
         content="React ecosystem is mature and has good graph visualization libraries.",
-        project="engram",
+        project="yonakh",
     ))
     store.create(EntityCreate(
         entity_type=EntityType.BUG_REPORT,
         title="SQLite WAL mode not enabled",
         content="Concurrent reads are blocking writes because WAL mode was not set.",
-        project="engram",
+        project="yonakh",
     ))
     return store
 
@@ -53,7 +53,7 @@ def test_search_by_project(db_conn):
     _seed(db_conn)
     fts = FTSStore(db_conn)
 
-    results = fts.search("storage", project="engram")
+    results = fts.search("storage", project="yonakh")
     assert len(results) >= 1
 
     results = fts.search("storage", project="other")

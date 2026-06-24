@@ -6,16 +6,16 @@ import sqlite3
 
 import pytest
 
-from engram.db.engine import _set_pragmas, _read_schema_sql
-from engram.embedding.pipeline import EmbeddingPipeline
-from engram.models.base import EntityType
-from engram.models.entities import EntityCreate
-from engram.models.search import SearchQuery
-from engram.search.hybrid import HybridSearch
-from engram.store.entity_store import EntityStore
-from engram.store.fts_store import FTSStore
-from engram.store.relationship_store import RelationshipStore
-from engram.store.vector_store import VectorStore
+from yonakh.db.engine import _set_pragmas, _read_schema_sql
+from yonakh.embedding.pipeline import EmbeddingPipeline
+from yonakh.models.base import EntityType
+from yonakh.models.entities import EntityCreate
+from yonakh.models.search import SearchQuery
+from yonakh.search.hybrid import HybridSearch
+from yonakh.store.entity_store import EntityStore
+from yonakh.store.fts_store import FTSStore
+from yonakh.store.relationship_store import RelationshipStore
+from yonakh.store.vector_store import VectorStore
 from tests.fake_embedding import FakeEmbeddingProvider
 
 
@@ -34,28 +34,28 @@ def search_env(db_conn):
             entity_type=EntityType.DECISION,
             title="Use SQLite for storage",
             content="We chose SQLite for local-first storage with zero dependencies.",
-            project="engram",
+            project="yonakh",
             importance=0.9,
         ),
         EntityCreate(
             entity_type=EntityType.DECISION,
             title="Use React for the dashboard",
             content="React has the best ecosystem for graph visualization components.",
-            project="engram",
+            project="yonakh",
             importance=0.8,
         ),
         EntityCreate(
             entity_type=EntityType.BUG_REPORT,
             title="SQLite WAL mode not enabled",
             content="Concurrent reads are blocking writes because WAL mode was not set.",
-            project="engram",
+            project="yonakh",
             importance=0.7,
         ),
         EntityCreate(
             entity_type=EntityType.FAILED_ATTEMPT,
             title="Tried Redis for caching",
             content="Redis added too much operational complexity for a local tool.",
-            project="engram",
+            project="yonakh",
             importance=0.6,
         ),
         EntityCreate(
@@ -110,11 +110,11 @@ def test_search_filters_by_project(search_env):
     search, _ = search_env
     response = search.search(SearchQuery(
         query="authentication middleware",
-        project="engram",
+        project="yonakh",
     ))
 
     for r in response.results:
-        assert r.entity.project == "engram"
+        assert r.entity.project == "yonakh"
 
 
 def test_search_min_importance(search_env):
@@ -130,7 +130,7 @@ def test_search_min_importance(search_env):
 
 def test_search_respects_limit(search_env):
     search, _ = search_env
-    response = search.search(SearchQuery(query="engram project", limit=2))
+    response = search.search(SearchQuery(query="yonakh project", limit=2))
     assert len(response.results) <= 2
 
 
